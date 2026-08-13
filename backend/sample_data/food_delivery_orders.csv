@@ -1,0 +1,5 @@
+customer_id,order_id,order_date,app_name,restaurant,item_category,total_paid,payment_method,city
+CUST_1001,SWG_F01,2026-08-02 20:15:00,Swiggy,Domino's Pizza,Fast Food, ₹650.00 ,UPI,Delhi
+CUST_1002,ZOM_F02,2026-08-04 13:45:00,Zomato,Haldiram's,North Indian,420.00,DEBIT_CARD,Mumbai
+CUST_1003,SWG_F03,07-08-2026 21:00:00,Swiggy,Truffles,Burgers,780.00,CREDIT_CARD,Bengaluru
+CUST_1004,EAT_F04,2026-08-09 14:20:00,EatSure,Behrouz Biryani,Biryani,590.00,UPI,Hyderabad

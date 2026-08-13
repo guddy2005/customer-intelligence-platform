@@ -1,0 +1,7 @@
+customer_id,full_name,email,phone,city,state
+CUST_1001,Rajesh Kumar,rajesh.k@gmail.com,+919876543210,Delhi ,Delhi
+CUST_1002,Priya Sharma,priya.sharma@yahoo.com,+919812345678,Mumbai,Maharashtra
+CUST_1003,Amit Verma,amit.v@hotmail.com,+919988776655,Bengaluru ,Karnataka
+CUST_1004,Neha Gupta,neha.g@outlook.com,+919765432109,Hyderabad,Telangana
+CUST_1005,Vikram Singh,vikram.s@gmail.com,+919123456789,Pune,Maharashtra
+,Invalid Customer,invalid@email.com,+919000000000,Chennai,Tamil Nadu
