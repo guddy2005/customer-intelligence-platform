@@ -23,14 +23,16 @@ CREATE_TABLES_SQL = [
     CREATE TABLE IF NOT EXISTS `ingestion_batches` (
         `batch_id` VARCHAR(100) PRIMARY KEY,
         `filename` VARCHAR(255) NOT NULL,
-        `source_domain` VARCHAR(50) NOT NULL,
+        `input_type` VARCHAR(50) DEFAULT 'UNKNOWN',
+        `source_domain` VARCHAR(50) DEFAULT 'UNKNOWN',
         `total_records` INT DEFAULT 0,
         `valid_records` INT DEFAULT 0,
         `rejected_records` INT DEFAULT 0,
         `duplicate_records` INT DEFAULT 0,
         `inserted_records` INT DEFAULT 0,
-        `status` ENUM('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED') DEFAULT 'PENDING',
-        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+        `status` ENUM('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'PARTIAL') DEFAULT 'PENDING',
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+        `completed_at` DATETIME DEFAULT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """,
     """
@@ -49,7 +51,7 @@ CREATE_TABLES_SQL = [
         `batch_id` VARCHAR(100) NOT NULL,
         `row_number` INT NOT NULL,
         `field_name` VARCHAR(100),
-        `error_reason` VARCHAR(255) NOT NULL,
+        `error_reason` VARCHAR(500) NOT NULL,
         `raw_value` TEXT,
         `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT `fk_error_batch` FOREIGN KEY (`batch_id`) REFERENCES `ingestion_batches`(`batch_id`) ON DELETE CASCADE
@@ -67,12 +69,15 @@ CREATE_TABLES_SQL = [
         `category` VARCHAR(100) NOT NULL,
         `subcategory` VARCHAR(100),
         `transaction_date` DATETIME NOT NULL,
-        `amount` DECIMAL(15, 2) NOT NULL,
+        `amount` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
         `currency` VARCHAR(10) DEFAULT 'INR',
         `payment_method` VARCHAR(50),
         `merchant_or_provider` VARCHAR(255),
         `location` VARCHAR(100),
         `status` VARCHAR(50) DEFAULT 'COMPLETED',
+        `raw_message` LONGTEXT DEFAULT NULL,
+        `classification_confidence` DECIMAL(4, 2) DEFAULT NULL,
+        `classified_at` DATETIME DEFAULT NULL,
         `record_hash` VARCHAR(64) UNIQUE NOT NULL,
         `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT `fk_txn_batch` FOREIGN KEY (`batch_id`) REFERENCES `ingestion_batches`(`batch_id`) ON DELETE CASCADE,
@@ -87,6 +92,42 @@ CREATE_TABLES_SQL = [
 ]
 
 
+def migrate_schema(cursor):
+    """
+    Safely migrates existing tables to add new columns if they are missing.
+    Safe to run multiple times — uses ALTER TABLE with IF NOT EXISTS pattern.
+    """
+    migrations = [
+        # ingestion_batches: add input_type column
+        "ALTER TABLE `ingestion_batches` ADD COLUMN `input_type` VARCHAR(50) DEFAULT 'UNKNOWN'",
+        # ingestion_batches: add completed_at column
+        "ALTER TABLE `ingestion_batches` ADD COLUMN `completed_at` DATETIME DEFAULT NULL",
+        # ingestion_batches: ensure source_domain is nullable
+        "ALTER TABLE `ingestion_batches` MODIFY COLUMN `source_domain` VARCHAR(50) DEFAULT 'UNKNOWN'",
+        # unified_transactions: add classification columns
+        "ALTER TABLE `unified_transactions` ADD COLUMN `classification_confidence` DECIMAL(4, 2) DEFAULT NULL",
+        "ALTER TABLE `unified_transactions` ADD COLUMN `classified_at` DATETIME DEFAULT NULL",
+        # unified_transactions: add raw_message for SMS/communication preservation
+        "ALTER TABLE `unified_transactions` ADD COLUMN `raw_message` LONGTEXT DEFAULT NULL",
+        # unified_transactions: allow amount to be 0 (informational SMS)
+        "ALTER TABLE `unified_transactions` MODIFY COLUMN `amount` DECIMAL(15, 2) NOT NULL DEFAULT 0.00",
+        # ingestion_batches: extend status ENUM to include PARTIAL
+        "ALTER TABLE `ingestion_batches` MODIFY COLUMN `status` ENUM('PENDING','PROCESSING','COMPLETED','FAILED','PARTIAL') DEFAULT 'PENDING'",
+    ]
+
+    for stmt in migrations:
+        try:
+            cursor.execute(stmt)
+            logger.info(f"Migration applied: {stmt[:60]}...")
+        except Exception as e:
+            # Column/change already exists — safe to ignore
+            err_str = str(e).lower()
+            if "duplicate column" in err_str or "already exists" in err_str or "1060" in str(e):
+                pass
+            else:
+                logger.debug(f"Migration skipped ({stmt[:50]}...): {e}")
+
+
 def init_db():
     logger.info("Initializing database tables...")
     conn = get_db_connection()
@@ -95,7 +136,12 @@ def init_db():
         for sql in CREATE_TABLES_SQL:
             cursor.execute(sql)
         conn.commit()
-        logger.info("All database tables created successfully.")
+
+        # Apply schema migrations for existing databases
+        migrate_schema(cursor)
+        conn.commit()
+
+        logger.info("All database tables initialized and migrations applied.")
     except Exception as e:
         logger.error(f"Error initializing database: {e}")
         conn.rollback()

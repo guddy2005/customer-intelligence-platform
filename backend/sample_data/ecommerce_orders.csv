@@ -1,7 +1,0 @@
-customer_id,order_id,order_date,platform,category,subcategory,order_amount,payment_mode,delivery_city
-CUST_1001,ORD_E01,2026-08-03 15:45:00,Amazon,Electronics,Wireless Headphones,"₹2,499.00",CREDIT_CARD,Delhi
-CUST_1002,ORD_E02,04/08/2026 19:10:00,Flipkart,Apparel,Running Shoes,3200.00,UPI,Mumbai
-CUST_1003,ORD_E03,2026-08-06 12:00:00,Myntra,Apparel,Denim Jacket,1850.00,NET_BANKING,Bengaluru
-CUST_1004,ORD_E04,2026-08-08 21:30:00,Ajio,Footwear,Sneakers,4100.00,CREDIT_CARD,Hyderabad
-CUST_1005,ORD_E05,2026-08-11 11:00:00,Nykaa,Beauty,Skincare Kit,1299.00,UPI,Pune
-CUST_1001,ORD_E01,2026-08-03 15:45:00,Amazon,Electronics,Wireless Headphones,2499.00,CREDIT_CARD,Delhi

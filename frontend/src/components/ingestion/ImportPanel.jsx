@@ -1,67 +1,42 @@
 import React, { useState } from 'react';
-import { Play, Loader } from 'lucide-react';
+import { Play, FileText, Layers, Settings2 } from 'lucide-react';
 import UploadZone from './UploadZone';
 
-/* Data type options per source category */
-const DATA_TYPE_MAP = {
-  banking:      ['Bank Transactions', 'Account Statements', 'Loan Records', 'Credit Card History'],
-  investments:  ['SIP Transactions', 'Stock Trades', 'Mutual Fund Portfolio', 'Digital Gold', 'Bonds'],
-  ecommerce:    ['Orders', 'Returns & Refunds', 'Wishlist Activity', 'Product Reviews', 'Cart Abandonment'],
-  food_delivery:['Food Orders', 'Restaurant Reviews', 'Subscription Plans', 'Offer Redemptions'],
-  travel:       ['Flight Bookings', 'Hotel Reservations', 'Cab Rides', 'Bus Tickets', 'Holiday Packages'],
-  automobile:   ['Vehicle Purchase', 'Service Records', 'Fuel Transactions', 'Insurance Renewals'],
-  real_estate:  ['Property Transactions', 'Rental Payments', 'Home Loans', 'Society Maintenance'],
-  utilities:    ['Electricity Bills', 'Water Bills', 'Gas Bills', 'Broadband Payments', 'Mobile Recharge'],
-  healthcare:   ['Doctor Visits', 'Lab Reports', 'Pharmacy Orders', 'Health Insurance Claims'],
-  education:    ['Course Enrollments', 'Fee Payments', 'Online Learning', 'Exam Registrations'],
-  retail:       ['In-Store Purchases', 'Loyalty Points', 'Fashion & Apparel', 'Subscription Boxes'],
-  insurance:    ['Policy Purchases', 'Premium Payments', 'Claims Filed', 'Policy Renewals'],
-  _default:     ['Select a source category first'],
-};
+const INPUT_TYPES = [
+  { value: 'AUTO_DETECT',   label: 'Auto Detect (SMS / Transactions / Customers)' },
+  { value: 'SMS',           label: 'SMS / Communication Logs (Multi-Source)' },
+  { value: 'TRANSACTIONS',  label: 'Structured Transactions CSV' },
+  { value: 'CUSTOMERS',     label: 'Customer Master Profiles' },
+  { value: 'JSON',          label: 'JSON / Event Stream' },
+];
 
-const SOURCE_OPTIONS = [
-  { value: '',             label: 'Select Source Category' },
-  { value: 'banking',      label: 'Banking' },
-  { value: 'investments',  label: 'Investments' },
-  { value: 'ecommerce',    label: 'E-Commerce' },
-  { value: 'food_delivery',label: 'Food Delivery' },
-  { value: 'travel',       label: 'Travel' },
-  { value: 'automobile',   label: 'Automobile' },
-  { value: 'real_estate',  label: 'Real Estate' },
-  { value: 'utilities',    label: 'Utilities' },
-  { value: 'healthcare',   label: 'Healthcare' },
-  { value: 'education',    label: 'Education' },
-  { value: 'retail',       label: 'Retail & Lifestyle' },
-  { value: 'insurance',    label: 'Insurance' },
+const BATCH_SIZE_OPTIONS = [
+  { value: 500,  label: '500  — Conservative (low RAM)' },
+  { value: 1000, label: '1000 — Default (recommended)' },
+  { value: 2000, label: '2000 — Fast (moderate RAM)' },
+  { value: 5000, label: '5000 — High throughput' },
 ];
 
 /**
- * ImportPanel — source/type selectors + UploadZone + process button.
+ * ImportPanel — Input type selector + Batch size + UploadZone + process button.
+ *
+ * Source domain is NOT selected here — it is determined at RECORD LEVEL
+ * by the classification engine after parsing.
  *
  * Props:
- *   selectedSource — source key pre-selected from DataSourceGrid (or null)
- *   isLoading      — boolean
- *   onProcess      — callback({ source, dataType, file })
+ *   isLoading  — bool, disables form while processing
+ *   onProcess  — callback({ inputType, file, batchSize })
  */
-export default function ImportPanel({ selectedSource, isLoading, onProcess }) {
-  const [source, setSource] = useState(selectedSource || '');
-  const [dataType, setDataType] = useState('');
+export default function ImportPanel({ isLoading, onProcess }) {
+  const [inputType, setInputType] = useState('AUTO_DETECT');
+  const [batchSize, setBatchSize] = useState(1000);
   const [file, setFile] = useState(null);
 
-  // Sync when parent grid selection changes
-  React.useEffect(() => {
-    if (selectedSource !== undefined) {
-      setSource(selectedSource || '');
-      setDataType('');
-    }
-  }, [selectedSource]);
-
-  const dataTypes = DATA_TYPE_MAP[source] || DATA_TYPE_MAP['_default'];
-  const canProcess = source && dataType && file;
+  const canProcess = Boolean(file) && !isLoading;
 
   const handleProcess = () => {
     if (!canProcess) return;
-    onProcess({ source, dataType, file });
+    onProcess({ inputType, file, batchSize });
   };
 
   return (
@@ -71,63 +46,106 @@ export default function ImportPanel({ selectedSource, isLoading, onProcess }) {
           <div className="card-title-icon" style={{ background: 'var(--primary-dim)', color: 'var(--primary-light)' }}>
             <Play size={15} />
           </div>
-          Import Data
+          Import &amp; Ingest Dataset
         </div>
       </div>
 
-      {/* Selectors */}
-      <div className="import-grid">
+      {/* Row 1: Input Type + Classification Mode */}
+      <div className="import-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
         <div className="form-group">
-          <label className="form-label" htmlFor="source-select">Source Category</label>
+          <label className="form-label" htmlFor="input-type-select">
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <FileText size={14} style={{ color: 'var(--primary-light)' }} />
+              Input / Content Type
+            </span>
+          </label>
           <select
-            id="source-select"
+            id="input-type-select"
             className="select-control"
-            value={source}
-            onChange={(e) => { setSource(e.target.value); setDataType(''); }}
+            value={inputType}
+            onChange={(e) => setInputType(e.target.value)}
+            disabled={isLoading}
           >
-            {SOURCE_OPTIONS.map((opt) => (
+            {INPUT_TYPES.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         </div>
 
         <div className="form-group">
-          <label className="form-label" htmlFor="datatype-select">Data Type</label>
-          <select
-            id="datatype-select"
-            className="select-control"
-            value={dataType}
-            onChange={(e) => setDataType(e.target.value)}
-            disabled={!source}
+          <label className="form-label">
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Layers size={14} style={{ color: 'var(--accent)' }} />
+              Classification Mode
+            </span>
+          </label>
+          <div
+            style={{
+              padding: '9px 14px',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-light)',
+              color: 'var(--text-sub)',
+              fontSize: '12.5px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
           >
-            <option value="">Select Data Type</option>
-            {dataTypes.map((dt) => (
-              <option key={dt} value={dt}>{dt}</option>
-            ))}
-          </select>
+            <span>Record-Level · Multi-Domain</span>
+            <span className="badge badge-success" style={{ fontSize: '10.5px' }}>Active</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Row 2: Batch Size */}
+      <div className="form-group" style={{ marginBottom: 16 }}>
+        <label className="form-label" htmlFor="batch-size-select">
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Settings2 size={14} style={{ color: 'var(--warning)' }} />
+            Batch Size
+            <span style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 400 }}>
+              — records processed per DB commit cycle
+            </span>
+          </span>
+        </label>
+        <select
+          id="batch-size-select"
+          className="select-control"
+          value={batchSize}
+          onChange={(e) => setBatchSize(Number(e.target.value))}
+          disabled={isLoading}
+          style={{ maxWidth: 340 }}
+        >
+          {BATCH_SIZE_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+        <div style={{ fontSize: '11.5px', color: 'var(--text-dim)', marginTop: 5 }}>
+          For SMS-Data.csv (100k+ records): 1000 is recommended. Larger batches are faster but use more RAM.
         </div>
       </div>
 
       {/* Upload Zone */}
-      <UploadZone file={file} onFileChange={setFile} />
+      <UploadZone file={file} onFileChange={isLoading ? undefined : setFile} />
 
       {/* Process Button */}
       <div className="mt-4">
         <button
           id="process-btn"
           className="btn btn-primary btn-lg btn-full"
-          disabled={!canProcess || isLoading}
+          disabled={!canProcess}
           onClick={handleProcess}
         >
           {isLoading ? (
             <>
               <div className="spinner" />
-              Processing Pipeline...
+              Processing Pipeline — Polling for Status...
             </>
           ) : (
             <>
               <Play size={16} />
-              Process & Ingest Dataset
+              Process &amp; Ingest Dataset
             </>
           )}
         </button>

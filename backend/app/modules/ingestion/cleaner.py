@@ -59,8 +59,16 @@ def clean_date(val: Optional[str]) -> Optional[str]:
     if not s:
         return None
 
-    # Replace T in ISO dates
-    s_clean = s.replace("T", " ").replace("Z", "")
+    # Replace T in ISO dates and strip trailing UTC/GMT if present for standard formats
+    s_clean = s.replace("T", " ").replace("Z", "").strip()
+
+    # Try parsing RFC 2822 date formats like 'Sat, 7 May 2022 19:48:00 UTC'
+    from email.utils import parsedate_to_datetime
+    try:
+        dt = parsedate_to_datetime(s)
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+    except Exception:
+        pass
 
     date_formats = [
         "%Y-%m-%d %H:%M:%S",
@@ -72,6 +80,7 @@ def clean_date(val: Optional[str]) -> Optional[str]:
         "%d-%m-%Y %H:%M:%S",
         "%d-%m-%Y %H:%M",
         "%d-%m-%Y",
+        "%d %b %Y %H:%M:%S",
         "%d %b %Y",
         "%d-%b-%Y",
         "%d %B %Y",
@@ -94,3 +103,4 @@ def clean_date(val: Optional[str]) -> Optional[str]:
         pass
 
     return None
+

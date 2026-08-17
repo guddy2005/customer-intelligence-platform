@@ -1,5 +1,0 @@
-customer_id,bill_id,bill_date,utility_type,provider,amount_paid,payment_channel,status
-CUST_1001,UTL_U01,2026-08-01 16:00:00,Electricity,BSES Rajdhani,"₹3,450.00",UPI,SUCCESS
-CUST_1002,UTL_U02,2026-08-03 11:30:00,Broadband,Airtel Xstream,1199.00,CREDIT_CARD,SUCCESS
-CUST_1003,UTL_U03,05/08/2026 15:10:00,Gas,Indane Gas,950.00,UPI,SUCCESS
-CUST_1004,UTL_U04,2026-08-08 17:40:00,Mobile Recharge,Jio Prepaid,749.00,NET_BANKING,SUCCESS

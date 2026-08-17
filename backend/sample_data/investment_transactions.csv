@@ -1,5 +1,0 @@
-customer_id,trade_id,date,platform,investment_type,scheme_name,amount,payment_mode
-CUST_1001,INV_I01,2026-08-05 09:30:00,Zerodha,SIP,Nifty 50 Index Fund,10000.00,AUTO_DEBIT
-CUST_1002,INV_I02,2026-08-05 10:00:00,Groww,SIP,Parag Parikh Flexi Cap,15000.00,AUTO_DEBIT
-CUST_1003,INV_I03,2026-08-07 14:15:00,AngelOne,Stock Trading,TATA MOTORS SHARES,25000.00,UPI
-CUST_1004,INV_I04,10/08/2026 11:00:00,Zerodha,Digital Gold,Sovereign Gold Bond,5000.00,NET_BANKING

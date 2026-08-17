@@ -102,10 +102,12 @@ const MOCK_HISTORY = [
 ];
 
 const STATUS_CONFIG = {
-  COMPLETED: { className: 'badge-success', label: 'Completed' },
-  PARTIAL:   { className: 'badge-warning', label: 'Partial' },
-  FAILED:    { className: 'badge-danger',  label: 'Failed' },
-  RUNNING:   { className: 'badge-info',    label: 'Running' },
+  COMPLETED:  { className: 'badge-success', label: 'Completed' },
+  PARTIAL:    { className: 'badge-warning', label: 'Partial' },
+  FAILED:     { className: 'badge-danger',  label: 'Failed' },
+  RUNNING:    { className: 'badge-info',    label: 'Running' },
+  PROCESSING: { className: 'badge-info',    label: 'Processing' },
+  PENDING:    { className: 'badge-warning', label: 'Pending' },
 };
 
 /**
@@ -141,13 +143,13 @@ export default function IngestionHistory({ rows, onRefresh }) {
           <thead>
             <tr>
               <th>Run ID</th>
-              <th>Source</th>
-              <th>Dataset / Data Type</th>
+              <th>Input Type</th>
+              <th>Dataset / Filename</th>
               <th>Records</th>
               <th>Valid</th>
               <th>Rejected</th>
               <th>Duplicates</th>
-              <th>Date & Time</th>
+              <th>Date &amp; Time</th>
               <th>Status</th>
             </tr>
           </thead>
