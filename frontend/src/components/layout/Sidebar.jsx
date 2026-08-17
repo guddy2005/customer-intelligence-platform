@@ -22,20 +22,15 @@ const NAV_SECTIONS = [
       { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     ],
   },
-  {
-    label: 'Data',
-    items: [
-      { key: 'customers', label: 'Customer Profiles', icon: Users },
-      { key: 'transactions', label: 'Transactions', icon: CreditCard },
-      { key: 'ingestion', label: 'Data Ingestion', icon: DatabaseZap, badge: 'Hub' },
-    ],
-  },
+ 
   {
     label: 'Intelligence',
     items: [
+       { key: 'customers', label: 'Customer Profiles', icon: Users },
       { key: 'analytics', label: 'Analytics', icon: BarChart3 },
       { key: 'audience', label: 'Audience', icon: Target },
       { key: 'insights', label: 'Insights', icon: Lightbulb },
+            { key: 'ingestion', label: 'Data Ingestion', icon: DatabaseZap, badge: 'Hub' },
     ],
   },
   {
