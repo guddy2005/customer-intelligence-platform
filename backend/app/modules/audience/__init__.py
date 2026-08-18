@@ -1,0 +1,31 @@
+from backend.app.modules.audience.service import (
+    list_audiences,
+    create_audience,
+    get_audience,
+    update_audience,
+    archive_audience,
+    duplicate_audience,
+    get_audience_attributes,
+    preview_audience,
+    get_audience_customers,
+    get_audience_analytics,
+    train_segmentation_model,
+    get_segmentation_status,
+    get_segmentation_results,
+)
+
+__all__ = [
+    "list_audiences",
+    "create_audience",
+    "get_audience",
+    "update_audience",
+    "archive_audience",
+    "duplicate_audience",
+    "get_audience_attributes",
+    "preview_audience",
+    "get_audience_customers",
+    "get_audience_analytics",
+    "train_segmentation_model",
+    "get_segmentation_status",
+    "get_segmentation_results",
+]

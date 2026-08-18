@@ -1,6 +1,7 @@
 import sys
 import logging
 from backend.app.database.connection import get_db_connection
+from backend.app.modules.audience.service import ensure_audience_tables
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("init_db")
@@ -88,6 +89,42 @@ CREATE_TABLES_SQL = [
         INDEX `idx_date` (`transaction_date`),
         INDEX `idx_category` (`category`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS `feature_definitions` (
+        `feature_id` VARCHAR(100) PRIMARY KEY,
+        `display_name` VARCHAR(255) NOT NULL,
+        `description` TEXT NULL,
+        `category` VARCHAR(50) NOT NULL DEFAULT 'FINANCIAL',
+        `data_type` VARCHAR(50) NOT NULL DEFAULT 'NUMBER',
+        `aggregation_type` VARCHAR(50) NOT NULL DEFAULT 'SUM',
+        `time_window` VARCHAR(50) NOT NULL DEFAULT 'ALL_TIME',
+        `unit` VARCHAR(50) DEFAULT 'INR',
+        `status` VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+        `version` VARCHAR(20) NOT NULL DEFAULT 'v1',
+        `parameters_json` LONGTEXT NULL,
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX `idx_feature_category` (`category`),
+        INDEX `idx_feature_status` (`status`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS `customer_feature_values` (
+        `customer_id` VARCHAR(100) NOT NULL,
+        `feature_id` VARCHAR(100) NOT NULL,
+        `value_numeric` DECIMAL(18, 2) NULL,
+        `value_string` VARCHAR(255) NULL,
+        `value_json` LONGTEXT NULL,
+        `version` VARCHAR(20) NOT NULL DEFAULT 'v1',
+        `confidence` DECIMAL(5, 2) NOT NULL DEFAULT 1.00,
+        `calculated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`customer_id`, `feature_id`),
+        CONSTRAINT `fk_cfv_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`customer_id`) ON DELETE CASCADE,
+        CONSTRAINT `fk_cfv_feature` FOREIGN KEY (`feature_id`) REFERENCES `feature_definitions`(`feature_id`) ON DELETE CASCADE,
+        INDEX `idx_cfv_feature` (`feature_id`),
+        INDEX `idx_cfv_calculated` (`calculated_at`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """
 ]
 
@@ -141,6 +178,7 @@ def init_db():
         migrate_schema(cursor)
         conn.commit()
 
+        ensure_audience_tables()
         logger.info("All database tables initialized and migrations applied.")
     except Exception as e:
         logger.error(f"Error initializing database: {e}")

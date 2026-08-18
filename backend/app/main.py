@@ -6,6 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from backend.app.modules.ingestion.router import router as ingestion_router
 from backend.app.modules.classification.router import router as classification_router
+from backend.app.modules.analytics.router import router as analytics_router
+from backend.app.modules.audience.router import router as audience_router
 from backend.app.database.init_db import init_db
 
 
@@ -38,6 +40,10 @@ app.include_router(ingestion_router, prefix="/api/v1")
 app.include_router(ingestion_router)  # Keep legacy /ingestion path as well
 app.include_router(classification_router, prefix="/api/v1")
 app.include_router(classification_router)
+app.include_router(analytics_router, prefix="/api/v1")
+app.include_router(analytics_router)
+app.include_router(audience_router, prefix="/api/v1")
+app.include_router(audience_router)
 
 
 
