@@ -16,6 +16,7 @@ CREATE_TABLES_SQL = [
         `phone` VARCHAR(50),
         `city` VARCHAR(100),
         `state` VARCHAR(100),
+        `location` VARCHAR(255),
         `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
         `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

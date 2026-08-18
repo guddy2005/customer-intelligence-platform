@@ -1,5 +1,5 @@
 # pyrefly: ignore [missing-import]
-from pydantic import BaseModel, Field
+from pydantic import BaseModel # type: ignore
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 

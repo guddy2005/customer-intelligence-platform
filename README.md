@@ -16,10 +16,46 @@ This platform supports:
 
 ## Architecture
 
-- Backend: Python + FastAPI
-- Frontend: React + Vite
-- Data layer: database-backed batch ingestion and processing
-- Sample datasets: included under the backend sample_data folder
+- Backend: Python + FastAPI with modular architecture
+- Data layer: Database-backed batch ingestion and processing
+- Sample datasets: CSV files included under backend/sample_data/
+
+## Backend Modules
+
+The backend is organized into feature-specific modules under `backend/app/modules/`:
+
+### Analytics
+
+- **Purpose**: Compute metrics and aggregations on processed customer data
+- **Key Components**: Aggregator, feature engine, identity service
+
+### Audience
+
+- **Purpose**: Manage customer segments and audience definitions
+- **Key Components**: Segment creation, audience management services
+
+### Classification
+
+- **Purpose**: Classify and categorize customer records using rules and ML
+- **Key Components**: Classifier, classification rules, validation
+
+### Data
+
+- **Purpose**: Core data models and schemas for the platform
+- **Key Components**: Common data schemas and service layer
+
+### Ingestion
+
+- **Purpose**: Ingest and normalize customer data from multiple sources
+- **Key Components**:
+  - Connectors: API, CSV, Database data sources
+  - Parsers: Generic, CSV, SMS data parsing
+  - Services: Validation, cleaning, normalization, classification
+
+### Processing
+
+- **Purpose**: Post-ingestion data transformations and rule application
+- **Key Components**: Batch processing engine, processing rules
 
 ## Project Structure
 
@@ -28,19 +64,72 @@ Customer_Intelligence_platform/
 ├── backend/
 │   ├── app/
 │   │   ├── core/
+│   │   │   ├── config.py
+│   │   │   └── constants.py
 │   │   ├── database/
+│   │   │   ├── connection.py
+│   │   │   └── init_db.py
 │   │   ├── modules/
+│   │   │   ├── analytics/
+│   │   │   │   ├── aggregator.py
+│   │   │   │   ├── feature_engine.py
+│   │   │   │   ├── identity_service.py
+│   │   │   │   ├── router.py
+│   │   │   │   ├── schemas.py
+│   │   │   │   └── service.py
+│   │   │   ├── audience/
+│   │   │   │   ├── router.py
+│   │   │   │   ├── schemas.py
+│   │   │   │   └── service.py
+│   │   │   ├── classification/
+│   │   │   │   ├── classifier.py
+│   │   │   │   ├── constants.py
+│   │   │   │   ├── router.py
+│   │   │   │   ├── rules.py
+│   │   │   │   ├── schemas.py
+│   │   │   │   └── service.py
+│   │   │   ├── data/
+│   │   │   │   ├── schemas.py
+│   │   │   │   └── service.py
+│   │   │   ├── ingestion/
+│   │   │   │   ├── classifier.py
+│   │   │   │   ├── cleaner.py
+│   │   │   │   ├── normalizer.py
+│   │   │   │   ├── router.py
+│   │   │   │   ├── schemas.py
+│   │   │   │   ├── service.py
+│   │   │   │   ├── validator.py
+│   │   │   │   ├── connectors/
+│   │   │   │   │   ├── api_connector.py
+│   │   │   │   │   ├── base.py
+│   │   │   │   │   ├── csv_connector.py
+│   │   │   │   │   └── db_connector.py
+│   │   │   │   └── parsers/
+│   │   │   │       ├── base.py
+│   │   │   │       ├── csv_parser.py
+│   │   │   │       ├── generic_parser.py
+│   │   │   │       └── sms_parser.py
+│   │   │   └── processing/
+│   │   │       ├── processor.py
+│   │   │       ├── router.py
+│   │   │       ├── rules.py
+│   │   │       ├── schemas.py
+│   │   │       └── service.py
 │   │   ├── main.py
 │   │   └── __init__.py
 │   ├── sample_data/
+│   │   ├── sms_data.csv
+│   │   └── SMS-Data.csv
 │   └── tests/
-├── frontend/
-│   ├── src/
-│   ├── index.html
-│   ├── package.json
-│   └── vite.config.js
+│       ├── test_classification.py
+│       ├── test_connectors.py
+│       ├── test_datasets.py
+│       ├── test_direct_debug.py
+│       ├── test_sms_ingestion.py
+│       ├── test_upload_http.py
+│       └── test_upload_structured.py
+├── ML_design.md
 ├── requirements.txt
-├── .gitignore
 └── README.md
 ```
 
